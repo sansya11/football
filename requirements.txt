@@ -1,0 +1,7 @@
+ultralytics
+opencv-python
+loguru
+tqdm
+filterpy
+scipy
+numpy<2.0 

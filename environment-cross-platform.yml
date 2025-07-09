@@ -1,0 +1,22 @@
+name: football-player-reid
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - numpy<2.0
+  - pytorch=2.1.0
+  - torchvision
+  - torchaudio
+  - cpuonly
+  - ultralytics
+  - opencv
+  - loguru
+  - tqdm
+  - filterpy
+  - scipy
+  - pip
+  - pip:
+    - dataclasses 

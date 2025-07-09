@@ -1,0 +1,11 @@
+README.md
+setup.py
+football_player_reid.egg-info/PKG-INFO
+football_player_reid.egg-info/SOURCES.txt
+football_player_reid.egg-info/dependency_links.txt
+football_player_reid.egg-info/top_level.txt
+src/__init__.py
+src/detector.py
+src/main.py
+src/tracker.py
+src/utils.py
