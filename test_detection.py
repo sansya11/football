@@ -67,7 +67,11 @@ def test_yolo_detection():
     
     # Save annotated frame
     cv2.imwrite("output/detection_test.jpg", annotated_frame)
+    cv2.imshow("Annotated Frame", annotated_frame)
     print("Saved annotated frame to output/detection_test.jpg")
+    
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
     
     cap.release()
 

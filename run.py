@@ -189,75 +189,82 @@ class PlayerDetector:
         return detections[keep]
 
 
+import torchreid
+from torchvision import transforms
+from PIL import Image
+
 class AppearanceExtractor:
-    """Extract appearance features for re-identification"""
-    
     def __init__(self, feature_dim: int = 512):
         self.feature_dim = feature_dim
         logger.info("AppearanceExtractor initialized")
-    
+        # Load strong ReID model
+        self.deep_model = torchreid.models.build_model(
+            name='osnet_x0_25', num_classes=1000, pretrained=True
+        )
+        self.deep_model.eval()
+        self.deep_transform = transforms.Compose([
+            transforms.Resize((256, 128)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+
     def extract_features(self, frame: np.ndarray, bbox: np.ndarray) -> np.ndarray:
-        """
-        Extract appearance features from bounding box region
-        
-        Args:
-            frame: Full image frame
-            bbox: Bounding box [x1, y1, x2, y2, conf]
-            
-        Returns:
-            features: Normalized feature vector
-        """
         try:
             x1, y1, x2, y2 = bbox[:4].astype(int)
-            
-            # Ensure coordinates are within frame bounds
             h, w = frame.shape[:2]
             x1 = max(0, min(x1, w-1))
             y1 = max(0, min(y1, h-1))
             x2 = max(x1+1, min(x2, w))
             y2 = max(y1+1, min(y2, h))
-            
-            # Extract ROI
             roi = frame[y1:y2, x1:x2]
-            
             if roi.size == 0:
-                return np.zeros(self.feature_dim)
-            
-            # Resize to standard size
+                return np.zeros(self.feature_dim + 512)  # 512 for deep features
+
             roi_resized = cv2.resize(roi, (64, 128))
-            
-            # Extract multiple features
+
             features = []
-            
+
             # 1. Color histogram features
             hist_features = self._extract_color_histogram(roi_resized)
             features.extend(hist_features)
-            
-            # 2. Texture features (LBP-like)
+
+            # 2. Texture features
             texture_features = self._extract_texture_features(roi_resized)
             features.extend(texture_features)
-            
+
             # 3. Spatial features
             spatial_features = self._extract_spatial_features(bbox, frame.shape)
             features.extend(spatial_features)
+
+            # 4. Deep ReID features
+            roi_pil = Image.fromarray(cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
+            deep_input = self.deep_transform(roi_pil).unsqueeze(0)
+            with torch.no_grad():
+                deep_feat = self.deep_model(deep_input)
+            deep_feat = deep_feat.cpu().numpy().flatten()
+            deep_feat = deep_feat / (np.linalg.norm(deep_feat) + 1e-6)
+            features.extend(deep_feat)
             
+            all_features = np.concatenate([hist_features, texture_features, spatial_features, deep_feat])
+
             # Pad or truncate to desired dimension
             features = np.array(features)
-            if len(features) > self.feature_dim:
-                features = features[:self.feature_dim]
-            elif len(features) < self.feature_dim:
-                features = np.pad(features, (0, self.feature_dim - len(features)))
-            
+            total_dim = self.feature_dim + 512
+            if len(features) > total_dim:
+                features = features[:total_dim]
+            elif len(features) < total_dim:
+                features = np.pad(features, (0, total_dim - len(features)))
+
             # Normalize
             norm = np.linalg.norm(features)
             if norm > 0:
                 features = features / norm
-            
+
             return features
-            
+
         except Exception as e:
             logger.error(f"Feature extraction failed: {e}")
-            return np.zeros(self.feature_dim)
+            return np.zeros(self.feature_dim + 512)
     
     def _extract_color_histogram(self, roi: np.ndarray, bins: int = 32) -> List[float]:
         """Extract color histogram features"""
@@ -491,9 +498,9 @@ class ByteTracker:
     Based on: https://arxiv.org/abs/2110.06864
     """
     
-    def __init__(self, frame_rate: int = 30, track_thresh: float = 0.5, track_buffer: int = 30,
+    def __init__(self, frame_rate: int = 30, track_thresh: float = 0.5, track_buffer: int = 120,
                  match_thresh: float = 0.8, high_thresh: float = 0.6, low_thresh: float = 0.1,
-                 appearance_thresh: float = 0.25):
+                 appearance_thresh: float = 0.15):
         """
         Initialize ByteTracker
         
