@@ -4,7 +4,7 @@ This project provides an end-to-end system for detecting and tracking football p
 
 ## 🌟 Key Features
 
-- **Player Detection**: Utilizes a pre-trained YOLOv8 model to detect players and the ball.
+- **Player Detection**: Utilizes a pre-trained YOLOv11 model to detect players and the ball.
 - **Player Tracking**: A lightweight centroid-based tracker assigns and maintains unique IDs for each player.
 - **Video Annotation**: Draws bounding boxes and track IDs on the video to visualize the results.
 - **Single-File Implementation**: All code is contained in a single `run.py` script for simplicity and portability.
@@ -28,7 +28,7 @@ This project provides an end-to-end system for detecting and tracking football p
 
 2. **Place your files:**
    - Put your video file in the `input/` directory as `15sec_input_720p.mp4`
-   - Download the compatible YOLOv8 model to `models/yolov8n.pt`:
+   - Download the compatible YOLOv11 model to `models/yolov11n.pt`:
      ```bash
      curl -L https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt -o models/yolov8n.pt
      ```
