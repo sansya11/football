@@ -1,15 +1,18 @@
-# Football Player Re-Identification System
+# Player Re-Identification in Sports Footage (Single Feed)
 
-This project provides an end-to-end system for detecting and tracking football players in a video. It uses a YOLOv8 model for object detection and a custom simple centroid-based tracker to maintain consistent player IDs across frames.
+A complete, practical solution for automatically **detecting, tracking, and re-identifying players** in sports match videos from a single camera feed. The system uses a YOLOv11 deep learning model for detection and the Deep SORT algorithm for robust multi-object tracking and re-identification. All core logic is implemented in a single, easy-to-use script.
+
+---
 
 ## 🌟 Key Features
 
-- **Player Detection**: Utilizes a pre-trained YOLOv11 model to detect players and the ball.
-- **Player Tracking**: A lightweight centroid-based tracker assigns and maintains unique IDs for each player.
-- **Video Annotation**: Draws bounding boxes and track IDs on the video to visualize the results.
-- **Single-File Implementation**: All code is contained in a single `run.py` script for simplicity and portability.
+- **Player Detection:** Uses a pre-trained YOLOv11 model to identify players and the ball in each frame.
+- **Player Tracking:** Employs Deep SORT, combining motion (Kalman filter) and appearance features for robust, consistent player IDs—even after occlusion.
+- **Re-Identification:** Maintains player IDs when players leave and re-enter the scene.
+- **Video Annotation:** Draws bounding boxes and IDs on the video for clear visualization.
+- **Single-Script Pipeline:** All major functionality is in `run.py` for simplicity and portability.
 
-## 🚀 Usage
+---
 
 ### Installation
 
@@ -28,10 +31,7 @@ This project provides an end-to-end system for detecting and tracking football p
 
 2. **Place your files:**
    - Put your video file in the `input/` directory as `15sec_input_720p.mp4`
-   - Download the compatible YOLOv11 model to `models/yolov11n.pt`:
-     ```bash
-     curl -L https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt -o models/yolov8n.pt
-     ```
+   - Download the YOLOv11 model to `models/yolo_model.pt`:
 
 3. **Run the system:**
    ```bash
@@ -82,95 +82,28 @@ All required packages are listed in conda environment files or `requirements.txt
 - `environment-cpu.yml` - CPU-only version (explicit CPU-only setup)
 - `requirements.txt` - Pip dependencies (alternative to conda)
 
-## 📦 Installation
 
-### Method 1: Conda Environment (Recommended)
-
-#### 1. Clone or Download the Project
-```bash
-# If using git
-git clone <repository-url>
-cd football-player-reid
-
-# Or download and extract the project files
-```
-
-#### 2. Create Conda Environment
-```bash
-# Option A: Cross-platform environment (recommended - works on all systems)
-conda env create -f environment-cross-platform.yml
-conda activate football-player-reid
-
-# Option B: GPU-enabled environment (Linux/Windows with CUDA)
-conda env create -f environment.yml
-conda activate football-player-reid
-
-# Option C: CPU-only environment (explicit CPU-only setup)
-conda env create -f environment-cpu.yml
-conda activate football-player-reid-cpu
-```
-
-#### 3. Verify Installation
-```bash
-python -c "import ultralytics, cv2, deep_sort_realtime; print('✅ Installation successful!')"
-```
-
-> **Note**: The environment files have been optimized for Python 3.9+ and automatically handle built-in modules like `dataclasses` and `pathlib`, eliminating common installation issues.
-
-### Method 2: Pip + Virtual Environment (Alternative)
-
-#### 1. Clone or Download the Project
-```bash
-# If using git
-git clone <repository-url>
-cd football-player-reid
-
-# Or download and extract the project files
-```
-
-#### 2. Create Virtual Environment
-```bash
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-```
-
-#### 3. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-#### 4. Verify Installation
-```bash
-python -c "import ultralytics, cv2, deep_sort_realtime; print('Installation successful!')"
-```
 
 ## 📁 Project Structure
 
 ```
 football-player-reid/
 ├── input/
-│   └── 15sec_input_720p.mp4    # Input video file
+│   └── 15sec_input_720p.mp4       # Input video file
 ├── models/
-│   └── yolo_model.pt           # YOLOv11 model file
+│   └── yolo_model.pt              # YOLOv11 model file
 ├── output/
-│   └── tracked_output.mp4      # Generated output video
-├── src/
-│   ├── detector.py             # YOLO detection wrapper
-│   ├── tracker.py              # Deep SORT tracking wrapper
-│   ├── utils.py                # Utility functions
-│   └── main.py                 # Main processing pipeline
-├── environment.yml             # Conda environment file (GPU)
-├── environment-cross-platform.yml  # Conda environment file (recommended)
-├── environment-cpu.yml         # Conda environment file (CPU-only)
-├── requirements.txt            # Python dependencies (pip)
-├── README.md                   # This file
-└── report.md                   # Technical report
+│   └── tracked_output.mp4         # Generated output video
+├── README.md                      # This file
+├── run.py                         # Main processing script
+├── environment-cross-platform.yml # Conda env (recommended)
+├── environment.yml                # Conda env (GPU)
+├── environment-cpu.yml            # Conda env (CPU-only)
+├── requirements.txt               # pip requirements
+├── setup.py                       # Python package setup
+├── test_detection.py              # Detection test script
+├── test_video.py                  # Video processing test script
+└── football_player_reid.egg-info # Packaging metadata
 ```
 
 ## 🔍 How It Works
@@ -355,7 +288,6 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 ## 📞 Support
 
 For questions or issues:
-- Check the `report.md` file for technical details
 - Review the troubleshooting section above
 - Create an issue in the project repository
 
